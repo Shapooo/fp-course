@@ -1,6 +1,6 @@
-{-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE NoImplicitPrelude #-}
 
 module Course.Comonad where
 
@@ -18,8 +18,8 @@ import Course.Extend
 --   `∀f. copure . (f <<=) == f
 class Extend f => Comonad f where
   copure ::
-    f a
-    -> a
+    f a ->
+    a
 
 -- | Implement the @Comonad@ instance for @ExactlyOne@.
 --
@@ -27,10 +27,10 @@ class Extend f => Comonad f where
 -- 7
 instance Comonad ExactlyOne where
   copure ::
-    ExactlyOne a
-    -> a
+    ExactlyOne a ->
+    a
   copure =
-    error "todo: Course.Comonad copure#instance ExactlyOne"
+    runExactlyOne
 
 -- | Witness that all things with (<<=) and copure also have (<$>).
 --
@@ -38,8 +38,8 @@ instance Comonad ExactlyOne where
 -- ExactlyOne 17
 (<$$>) ::
   Comonad f =>
-  (a -> b)
-  -> f a
-  -> f b
-(<$$>) =
-  error "todo: Course.Comonad#(<$>)"
+  (a -> b) ->
+  f a ->
+  f b
+(<$$>) f =
+  ((f . copure) <<=)

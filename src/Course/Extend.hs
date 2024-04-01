@@ -1,14 +1,14 @@
-{-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE NoImplicitPrelude #-}
 
 module Course.Extend where
 
 import Course.Core
 import Course.ExactlyOne
+import Course.Functor
 import Course.List
 import Course.Optional
-import Course.Functor
 
 -- | All instances of the `Extend` type-class must satisfy one law. This law
 -- is not checked by the compiler. This law is given as:
@@ -18,9 +18,9 @@ import Course.Functor
 class Functor f => Extend f where
   -- Pronounced, extend.
   (<<=) ::
-    (f a -> b)
-    -> f a
-    -> f b
+    (f a -> b) ->
+    f a ->
+    f b
 
 infixr 1 <<=
 
@@ -30,11 +30,11 @@ infixr 1 <<=
 -- ExactlyOne (ExactlyOne 7)
 instance Extend ExactlyOne where
   (<<=) ::
-    (ExactlyOne a -> b)
-    -> ExactlyOne a
-    -> ExactlyOne b
-  (<<=) =
-    error "todo: Course.Extend (<<=)#instance ExactlyOne"
+    (ExactlyOne a -> b) ->
+    ExactlyOne a ->
+    ExactlyOne b
+  (<<=) f =
+    ExactlyOne . f
 
 -- | Implement the @Extend@ instance for @List@.
 --
@@ -48,11 +48,11 @@ instance Extend ExactlyOne where
 -- [[[4,5,6],[1,2,3]],[[4,5,6]]]
 instance Extend List where
   (<<=) ::
-    (List a -> b)
-    -> List a
-    -> List b
-  (<<=) =
-    error "todo: Course.Extend (<<=)#instance List"
+    (List a -> b) ->
+    List a ->
+    List b
+  (<<=) _ Nil = Nil
+  (<<=) f l@(_ :. t) = f l :. (f <<= t)
 
 -- | Implement the @Extend@ instance for @Optional@.
 --
@@ -63,11 +63,11 @@ instance Extend List where
 -- Empty
 instance Extend Optional where
   (<<=) ::
-    (Optional a -> b)
-    -> Optional a
-    -> Optional b
-  (<<=) =
-    error "todo: Course.Extend (<<=)#instance Optional"
+    (Optional a -> b) ->
+    Optional a ->
+    Optional b
+  (<<=) _ Empty = Empty
+  (<<=) f o = Full (f o)
 
 -- | Duplicate the functor using extension.
 --
@@ -84,7 +84,7 @@ instance Extend Optional where
 -- Empty
 cojoin ::
   Extend f =>
-  f a
-  -> f (f a)
+  f a ->
+  f (f a)
 cojoin =
-  error "todo: Course.Extend#cojoin"
+  (<<=) id
